@@ -9,14 +9,16 @@ import java.util.Date;
  */
 public class Note {
 
-    public final long id;
+
     private Date date;
     private State state;
     private String content;
+    public final long id;
 
     public Note(long id) {
         this.id = id;
     }
+
 
     public Date getDate() {
         return date;

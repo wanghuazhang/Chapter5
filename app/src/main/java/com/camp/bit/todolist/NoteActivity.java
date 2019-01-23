@@ -1,7 +1,9 @@
 package com.camp.bit.todolist;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -11,16 +13,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.camp.bit.todolist.beans.State;
+import com.camp.bit.todolist.db.TodoContract;
+import com.camp.bit.todolist.db.TodoDbHelper;
+
+import java.util.Date;
+
 public class NoteActivity extends AppCompatActivity {
 
     private EditText editText;
     private Button addBtn;
+
+    public TodoDbHelper mDbHelper;
+
+    public SQLiteDatabase wdatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
         setTitle(R.string.take_a_note);
+
+        mDbHelper = new TodoDbHelper(this);
+        wdatabase = mDbHelper.getWritableDatabase();
 
         editText = findViewById(R.id.edit_text);
         editText.setFocusable(true);
@@ -58,11 +73,28 @@ public class NoteActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        wdatabase.close();
+        wdatabase = null;
         super.onDestroy();
     }
 
+
     private boolean saveNote2Database(String content) {
         // TODO 插入一条新数据，返回是否插入成功
+
+
+        ContentValues values = new ContentValues();
+
+        values.put(TodoContract.Todo.VALUE_CONTENT, content);
+        values.put(TodoContract.Todo.VALUE_DATE, new Date().getTime());
+        values.put(TodoContract.Todo.VALUE_STATE, State.TODO.intValue);
+
+        long newRowId = wdatabase.insert(TodoContract.Todo.TABLE_NAME, null, values);
+
+        if(newRowId > -1){
+            return true;
+        }
+
         return false;
     }
 }
